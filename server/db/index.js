@@ -10,3 +10,11 @@ var mysql = require('mysql2');
 // user: 'root', password: 'some_password_you_created_at_install'
 
 
+const config = {
+  host: 'localhost',
+  user: 'root',
+  //password: '',
+  database: 'chat',
+};
+
+module.exports = mysql.createConnection(config);

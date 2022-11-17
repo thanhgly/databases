@@ -43,7 +43,9 @@ describe('Persistent Node Chat Server', () => {
     axios.post(`${API_URL}/users`, { username })
       .then(() => {
         // Post a message to the node chat server:
-        return axios.post(`${API_URL}/messages`, { username, message, roomname });
+        return axios.post(`${API_URL}/messages`, { username, message, roomname }).then(function (response) {
+          console.log('axios post response', response);
+        });
       })
       .then(() => {
         // Now if we look in the database, we should find the posted message there.
