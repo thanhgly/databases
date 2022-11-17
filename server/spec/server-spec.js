@@ -8,13 +8,20 @@ const API_URL = 'http://127.0.0.1:3000/classes';
 
 describe('Persistent Node Chat Server', () => {
   const dbConnection = mysql.createConnection({
+    host: 'localhost',
     user: 'root',
-    password: '',
+    //password: '',
     database: 'chat',
   });
 
   beforeAll((done) => {
-    dbConnection.connect();
+    dbConnection.connect((err) => {
+      if (err) {
+        throw err;
+      } else {
+        console.log('Connected successfully');
+      }
+    });
 
     const tablename = 'messages'; // TODO: fill this out
 
@@ -44,10 +51,12 @@ describe('Persistent Node Chat Server', () => {
         /* TODO: You might have to change this test to get all the data from
          * your message table, since this is schema-dependent. */
 
-        const queryString = 'SELECT * FROM `messages` WHERE `user` = ? AND `messageText` = ? AND `roomname` = ?';
+        const queryString = 'SELECT * FROM messages';
+        //WHERE `user` = ? AND `messageText` = ? AND `roomname` = ?
         const queryArgs = [username, message, roomname];
 
         dbConnection.query(queryString, queryArgs, (err, results) => {
+          console.log('results', results);
           if (err) {
             throw err;
           }
