@@ -43,9 +43,7 @@ describe('Persistent Node Chat Server', () => {
     axios.post(`${API_URL}/users`, { username })
       .then(() => {
         // Post a message to the node chat server:
-        return axios.post(`${API_URL}/messages`, { username, message, roomname }).then(function (response) {
-          console.log('axios post response', response);
-        });
+        return axios.post(`${API_URL}/messages`, { username, message, roomname });
       })
       .then(() => {
         // Now if we look in the database, we should find the posted message there.
@@ -53,11 +51,12 @@ describe('Persistent Node Chat Server', () => {
         /* TODO: You might have to change this test to get all the data from
          * your message table, since this is schema-dependent. */
 
-        const queryString = 'SELECT * FROM messages WHERE `user` = ? AND `messageText` = ? AND `roomname` = ?';
+        const queryString = 'SELECT MAX(m.id), u.username, m.text, m.roomname FROM messages m INNER JOIN users u ON (u.id = m.user) WHERE u.username = ? AND m.text = ? AND m.roomname = ?';
+
         const queryArgs = [username, message, roomname];
 
         dbConnection.query(queryString, queryArgs, (err, results) => {
-          console.log('results', results);
+          console.log('results in first test', results);
           if (err) {
             throw err;
           }
@@ -65,8 +64,8 @@ describe('Persistent Node Chat Server', () => {
           expect(results.length).toEqual(1);
 
           // TODO: If you don't have a column named text, change this test.
-          console.log('results for test', results);
-          expect(results[0].messageText).toEqual(message);
+
+          expect(results[0].text).toEqual(message);
           done();
         });
       })
@@ -82,8 +81,8 @@ describe('Persistent Node Chat Server', () => {
     const message = 'In mercy\'s name, three days is all I need.';
     const roomname = 'Hello';
 
-    const queryString = 'INSERT INTO messages (user, messageText, roomname) values (?, ?, ?)';
-    const queryArgs = [username, message, roomname];
+    const queryString = 'INSERT INTO messages (user, text, roomname) SELECT u.id, ?, ? FROM users u WHERE u.username = ?';
+    const queryArgs = [message, roomname, username];
     /* TODO: The exact query string and query args to use here
      * depend on the schema you design, so I'll leave them up to you. */
     dbConnection.query(queryString, queryArgs, (err) => {
@@ -95,7 +94,7 @@ describe('Persistent Node Chat Server', () => {
       axios.get(`${API_URL}/messages`)
         .then((response) => {
           const messageLog = response.data;
-          expect(messageLog[0].messageText).toEqual(message);
+          expect(messageLog[0].text).toEqual(message);
           expect(messageLog[0].roomname).toEqual(roomname);
           done();
         })
