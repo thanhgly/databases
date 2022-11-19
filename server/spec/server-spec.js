@@ -36,7 +36,7 @@ describe('Persistent Node Chat Server', () => {
   });
 
   it('Should insert posted messages to the DB', (done) => {
-    const username = 'Valjean';
+    const username = 'Valjean22';
     const message = 'In mercy\'s name, three days is all I need.';
     const roomname = 'Hello';
     // Create a user on the chat server database.
@@ -56,7 +56,7 @@ describe('Persistent Node Chat Server', () => {
         const queryArgs = [username, message, roomname];
 
         dbConnection.query(queryString, queryArgs, (err, results) => {
-          console.log('results in first test', results);
+          //console.log('results in first test', results);
           if (err) {
             throw err;
           }
@@ -77,7 +77,7 @@ describe('Persistent Node Chat Server', () => {
   it('Should output all messages from the DB', (done) => {
     // Let's insert a message into the db
 
-    const username = 'Valjean';
+    const username = 'Valjean22';
     const message = 'In mercy\'s name, three days is all I need.';
     const roomname = 'Hello';
 
@@ -103,4 +103,61 @@ describe('Persistent Node Chat Server', () => {
         });
     });
   });
+
+  it('Should output all users from the DB', (done) => {
+    //dbConnection.query(`truncate messages`, done);
+
+    // Let's insert a message into the db
+
+    const username1 = 'User1';
+
+    const username2 = 'User2';
+
+    const username3 = 'User3';
+
+
+    const queryString = 'INSERT IGNORE INTO users (username) values (?)';
+    const queryArgs1 = [username1];
+    const queryArgs2 = [username2];
+    const queryArgs3 = [username3];
+
+    /* TODO: The exact query string and query args to use here
+     * depend on the schema you design, so I'll leave them up to you. */
+
+
+    dbConnection.query(queryString, queryArgs1, (err) => {
+      if (err) {
+        throw err;
+      }
+      dbConnection.query(queryString, queryArgs2, (err) => {
+        if (err) {
+          throw err;
+        }
+        dbConnection.query(queryString, queryArgs3, (err) => {
+          if (err) {
+            throw err;
+          }
+          axios.get(`${API_URL}/users`)
+            .then((response) => {
+              const messageLog = response.data;
+              console.log('messageLog', messageLog);
+              expect(messageLog[1].username).toEqual(username1);
+
+              expect(messageLog[2].username).toEqual(username2);
+
+              expect(messageLog[3].username).toEqual(username3);
+
+              done();
+            })
+            .catch((err) => {
+              throw err;
+            });
+        });
+      });
+
+
+    });
+  });
+
+
 });

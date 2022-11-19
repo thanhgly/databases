@@ -12,9 +12,12 @@ module.exports = {
   }, // a function which handles a get request for all messages
   post: function (req, res) {
     models.messages.create(req.body, function(err, data) {
+      console.log('request data', req.body);
       if (err) {
+        console.log('post err', err);
         res.status(400).send(err);
       } else {
+
         res.status(200).send("Post successful");
       }
     });

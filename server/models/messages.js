@@ -24,8 +24,12 @@ module.exports = {
 
   }, // a function which produces all the messages
   create: function (data, callback) {
-    console.log('data in create', data);
+    console.log('data in create models', data);
     var {username, text, roomname} = data;
+
+    if (data.message) {
+      var text = data.message;
+    }
     db.connect();
     // db.connect((err) => {
     //   if (err) {
@@ -43,12 +47,28 @@ module.exports = {
 
       if (err) {
         //throw err;
+        console.log("error in create", err);
         callback(err);
       } else {
         callback(null, results);
         // db.end();
       }
     });
+
+
+    // const username1 = 'hello';
+    // const message1 = 'hello';
+    // const roomname1 = 'Hello';
+
+    // const queryString1 = 'INSERT INTO messages (user, text, roomname) SELECT u.id, ?, ? FROM users u WHERE u.username = ?';
+    // const queryArgs1 = [message1, roomname1, username1];
+
+    // dbConnection.query(queryString1, queryArgs1, (err) => {
+    //   if (err) {
+    //     throw err;
+    //   }
+    // });
+
 
     // });
   } // a function which can be used to insert a message into the database

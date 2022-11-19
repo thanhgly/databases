@@ -33,7 +33,7 @@ module.exports = {
     //     throw err;
     //   } else {
     //     console.log('Connected successfully');
-    const queryString = 'INSERT IGNORE INTO users (username) values (?)';
+    const queryString = 'REPLACE INTO users (username) values (?)';
     const queryArgs = [username];
     db.query(queryString, queryArgs, (err, results) => {
       console.log('results in Create', results);
