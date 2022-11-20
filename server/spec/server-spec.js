@@ -37,13 +37,13 @@ describe('Persistent Node Chat Server', () => {
 
   it('Should insert posted messages to the DB', (done) => {
     const username = 'Valjean22';
-    const message = 'In mercy\'s name, three days is all I need.';
+    const text = 'In mercy\'s name, three days is all I need.';
     const roomname = 'Hello';
     // Create a user on the chat server database.
     axios.post(`${API_URL}/users`, { username })
       .then(() => {
         // Post a message to the node chat server:
-        return axios.post(`${API_URL}/messages`, { username, message, roomname });
+        return axios.post(`${API_URL}/messages`, { username, text, roomname });
       })
       .then(() => {
         // Now if we look in the database, we should find the posted message there.
@@ -51,9 +51,9 @@ describe('Persistent Node Chat Server', () => {
         /* TODO: You might have to change this test to get all the data from
          * your message table, since this is schema-dependent. */
 
-        const queryString = 'SELECT MAX(m.id), u.username, m.text, m.roomname FROM messages m INNER JOIN users u ON (u.id = m.user) WHERE u.username = ? AND m.text = ? AND m.roomname = ?';
+        const queryString = 'SELECT MAX(m.id), u.username, m.text, m.roomname FROM messages m INNER JOIN users u ON (u.id = m.UserId) WHERE u.username = ? AND m.text = ? AND m.roomname = ?';
 
-        const queryArgs = [username, message, roomname];
+        const queryArgs = [username, text, roomname];
 
         dbConnection.query(queryString, queryArgs, (err, results) => {
           //console.log('results in first test', results);
@@ -65,7 +65,7 @@ describe('Persistent Node Chat Server', () => {
 
           // TODO: If you don't have a column named text, change this test.
 
-          expect(results[0].text).toEqual(message);
+          expect(results[0].text).toEqual(text);
           done();
         });
       })
@@ -78,11 +78,11 @@ describe('Persistent Node Chat Server', () => {
     // Let's insert a message into the db
 
     const username = 'Valjean22';
-    const message = 'In mercy\'s name, three days is all I need.';
+    const text = 'In mercy\'s name, three days is all I need.';
     const roomname = 'Hello';
 
-    const queryString = 'INSERT INTO messages (user, text, roomname) SELECT u.id, ?, ? FROM users u WHERE u.username = ?';
-    const queryArgs = [message, roomname, username];
+    const queryString = 'INSERT INTO messages (UserId, text, roomname) SELECT u.id, ?, ? FROM users u WHERE u.username = ?';
+    const queryArgs = [text, roomname, username];
     /* TODO: The exact query string and query args to use here
      * depend on the schema you design, so I'll leave them up to you. */
     dbConnection.query(queryString, queryArgs, (err) => {
@@ -94,7 +94,7 @@ describe('Persistent Node Chat Server', () => {
       axios.get(`${API_URL}/messages`)
         .then((response) => {
           const messageLog = response.data;
-          expect(messageLog[0].text).toEqual(message);
+          expect(messageLog[0].text).toEqual(text);
           expect(messageLog[0].roomname).toEqual(roomname);
           done();
         })
@@ -107,57 +107,85 @@ describe('Persistent Node Chat Server', () => {
   it('Should output all users from the DB', (done) => {
     //dbConnection.query(`truncate messages`, done);
 
-    // Let's insert a message into the db
 
     const username1 = 'User1';
 
     const username2 = 'User2';
 
-    const username3 = 'User3';
+    axios.post(`${API_URL}/users`, { username: username1 })
+      .then(() => {
+        axios.post(`${API_URL}/users`, { username: username2 });
+      })
+      .then(() => {
+        axios.get(`${API_URL}/users`)
+          .then((response) => {
+            const userLog = response.data;
+            expect(userLog[userLog.length - 3].username).toEqual('Valjean22');
+
+            expect(userLog[userLog.length - 2].username).toEqual(username1);
+
+            expect(userLog[userLog.length - 1].username).toEqual(username2);
 
 
-    const queryString = 'INSERT IGNORE INTO users (username) values (?)';
-    const queryArgs1 = [username1];
-    const queryArgs2 = [username2];
-    const queryArgs3 = [username3];
-
-    /* TODO: The exact query string and query args to use here
-     * depend on the schema you design, so I'll leave them up to you. */
-
-
-    dbConnection.query(queryString, queryArgs1, (err) => {
-      if (err) {
-        throw err;
-      }
-      dbConnection.query(queryString, queryArgs2, (err) => {
-        if (err) {
-          throw err;
-        }
-        dbConnection.query(queryString, queryArgs3, (err) => {
-          if (err) {
+            done();
+          })
+          .catch((err) => {
             throw err;
-          }
-          axios.get(`${API_URL}/users`)
-            .then((response) => {
-              const messageLog = response.data;
-              console.log('messageLog', messageLog);
-              expect(messageLog[1].username).toEqual(username1);
+          });
 
-              expect(messageLog[2].username).toEqual(username2);
-
-              expect(messageLog[3].username).toEqual(username3);
-
-              done();
-            })
-            .catch((err) => {
-              throw err;
-            });
-        });
       });
 
-
-    });
+    // Let's insert a message into the db
   });
 
+  // it('should throw an error with wrong request endpoint', (done) => {
+  //   axios.get(`${API_URL}/afgdsga`)
+  //     .then((response) => {
+  //     })
+  //     .catch((err) => {
+  //       expect(err).toBeTruthy();
+  //       done();
+  //     });
+  // });
+
+  // it('should not found a message that has been delete from the DB', (done) => {
+
+  //   const username = 'Tester';
+  //   const text = 'Just a test.';
+  //   const roomname = 'Test';
+  //   axios.post(`${API_URL}/users`, { username })
+  //     .then(() => {
+
+  //       return axios.post(`${API_URL}/messages`, { username, text, roomname });
+  //     })
+  //     .then(() => {
+  //       const queryString = 'DELETE FROM messages m WHERE m.text = ?';
+
+  //       const queryArgs = [text];
+
+  //       dbConnection.query(queryString, queryArgs, (err, results) => {
+  //         if (err) {
+  //           throw err;
+  //         }
+
+
+  //       });
+  //     })
+  //     .then(() => {
+  //       axios.get(`${API_URL}/messages`)
+  //         .then((response) => {
+  //           const messageLog = response.data;
+  //           expect(messageLog[messageLog.length - 1].text).not.toEqual(text);
+  //           done();
+  //         })
+  //         .catch((err) => {
+  //           throw err;
+  //         });
+  //     })
+  //     .catch((err) => {
+  //       throw err;
+  //     });
+  // });
 
 });
+

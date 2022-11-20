@@ -1,22 +1,24 @@
 var models = require('../models');
+var User = require('../db/index.js').User;
 
 module.exports = {
   get: function (req, res) {
-    models.users.getAll(function(err, data) {
-      if (err) {
-        res.status(400).send(err);
-      } else {
-        res.status(200).send(data);
-      }
-    });
+    User.findAll()
+      .then(function(results) {
+        res.send(results);
+      })
+      .catch(function(err) {
+        throw new Error(err);
+      });
   },
   post: function (req, res) {
-    models.users.create(req.body, function(err, data) {
-      if (err) {
-        res.status(400).send(err);
-      } else {
-        res.status(200).send("Post successful");
-      }
-    });
+    User.create({username: req.body['username']})
+      .then(function(results) {
+        res.sendStatus(201);
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+
   }
 };

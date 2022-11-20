@@ -1,25 +1,38 @@
 var models = require('../models');
+var Message = require('../db').Message;
+var User = require('../db').User;
+
 
 module.exports = {
   get: function (req, res) {
-    models.messages.getAll(function(err, data) {
-      if (err) {
-        res.status(400).send(err);
-      } else {
-        res.status(200).send(data);
-      }
-    });
+    Message.findAll({ include: [User]})
+      .then(function(results) {
+        res.send(results);
+      })
+      .catch(function(err) {
+        throw new Error(err);
+      });
   }, // a function which handles a get request for all messages
   post: function (req, res) {
-    models.messages.create(req.body, function(err, data) {
-      console.log('request data', req.body);
-      if (err) {
-        console.log('post err', err);
-        res.status(400).send(err);
-      } else {
+    User.findOrCreate({
+      where: {username: req.body['username']}
+    }).then(function([user, created]) {
+      var params = {
+        text: req.body['text'],
+        UserId: user.id,
+        roomname: req.body['roomname']
+      };
+      Message.create(params)
+        .then(function(results) {
+          res.sendStatus(201);
+        })
+        .catch(function(err) {
+          throw new Error(err);
+        });
+    })
+      .catch(function(err) {
+        throw new Error(err);
+      });
 
-        res.status(200).send("Post successful");
-      }
-    });
   } // a function which handles posting a message to the database
 };
