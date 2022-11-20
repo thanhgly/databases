@@ -138,54 +138,54 @@ describe('Persistent Node Chat Server', () => {
     // Let's insert a message into the db
   });
 
-  // it('should throw an error with wrong request endpoint', (done) => {
-  //   axios.get(`${API_URL}/afgdsga`)
-  //     .then((response) => {
-  //     })
-  //     .catch((err) => {
-  //       expect(err).toBeTruthy();
-  //       done();
-  //     });
-  // });
+  it('should throw an error with wrong request endpoint', (done) => {
+    axios.get(`${API_URL}/afgdsga`)
+      .then((response) => {
+      })
+      .catch((err) => {
+        expect(err).toBeTruthy();
+        done();
+      });
+  });
 
-  // it('should not found a message that has been delete from the DB', (done) => {
+  it('should not found a message that has been delete from the DB', (done) => {
 
-  //   const username = 'Tester';
-  //   const text = 'Just a test.';
-  //   const roomname = 'Test';
-  //   axios.post(`${API_URL}/users`, { username })
-  //     .then(() => {
+    const username = 'Tester';
+    const text = 'Just a test.';
+    const roomname = 'Test';
+    axios.post(`${API_URL}/users`, { username })
+      .then(() => {
 
-  //       return axios.post(`${API_URL}/messages`, { username, text, roomname });
-  //     })
-  //     .then(() => {
-  //       const queryString = 'DELETE FROM messages m WHERE m.text = ?';
+        return axios.post(`${API_URL}/messages`, { username, text, roomname });
+      })
+      .then(() => {
+        const queryString = 'DELETE FROM messages m WHERE m.text = ?';
 
-  //       const queryArgs = [text];
+        const queryArgs = [text];
 
-  //       dbConnection.query(queryString, queryArgs, (err, results) => {
-  //         if (err) {
-  //           throw err;
-  //         }
+        dbConnection.query(queryString, queryArgs, (err, results) => {
+          if (err) {
+            throw err;
+          }
 
 
-  //       });
-  //     })
-  //     .then(() => {
-  //       axios.get(`${API_URL}/messages`)
-  //         .then((response) => {
-  //           const messageLog = response.data;
-  //           expect(messageLog[messageLog.length - 1].text).not.toEqual(text);
-  //           done();
-  //         })
-  //         .catch((err) => {
-  //           throw err;
-  //         });
-  //     })
-  //     .catch((err) => {
-  //       throw err;
-  //     });
-  // });
+        });
+      })
+      .then(() => {
+        axios.get(`${API_URL}/messages`)
+          .then((response) => {
+            const messageLog = response.data;
+            expect(messageLog[messageLog.length - 1].text).not.toEqual(text);
+            done();
+          })
+          .catch((err) => {
+            throw err;
+          });
+      })
+      .catch((err) => {
+        throw err;
+      });
+  });
 
 });
 
